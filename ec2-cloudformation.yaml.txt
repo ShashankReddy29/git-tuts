@@ -1,0 +1,52 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template to provision EC2 instance, IAM role, and S3 bucket.
+Resources:
+  
+  # EC2 Instance
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-0c55b159cbfafe1f0  # Amazon Linux 2 AMI
+      KeyName: MyKeyPair
+      SecurityGroupIds:
+        - sg-0123456789abcdef0
+  
+  # IAM Role and Policy
+  MyIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      
+  MyIAMPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: S3AccessPolicy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action: s3:*
+            Resource: "*"
+      Roles:
+        - Ref: MyIAMRole
+  
+  # S3 Bucket and File
+  MyS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: my-s3-bucket
+      AccessControl: Private
+
+  MyS3File:
+    Type: AWS::S3::Object
+    Properties:
+      Bucket: !Ref MyS3Bucket
+      Key: my-file.txt
+      Source: /path/to/my-file.txt
